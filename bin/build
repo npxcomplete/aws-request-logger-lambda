@@ -1,0 +1,22 @@
+#! /bin/bash
+
+set -eu -o pipefail
+
+ABSOLUTE_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/$(basename "${BASH_SOURCE[0]}")"
+PROJECT_ROOT=$(dirname $(dirname "$ABSOLUTE_PATH"))
+
+cd "$PROJECT_ROOT"
+mkdir -p build
+
+export GOOS=linux
+export GOARCH=amd64
+export CGO_ENABLED=0
+
+go build -o "$PROJECT_ROOT/build/main" ./main.go
+
+EXECUTABLE="$PROJECT_ROOT/build/main"
+if [[ $WINDOWS == "true" ]]; then
+  certUtil -hashfile "$EXECUTABLE" SHA1 | head -2 | tail -1
+else
+  sha1sum "$EXECUTABLE"
+fi

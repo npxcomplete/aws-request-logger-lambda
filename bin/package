@@ -1,0 +1,14 @@
+#! /bin/bash
+
+set -eu -o pipefail
+
+ABSOLUTE_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/$(basename "${BASH_SOURCE[0]}")"
+PROJECT_ROOT=$(dirname $(dirname "$ABSOLUTE_PATH"))
+
+EXECUTABLE="$PROJECT_ROOT/build/main"
+if [[ "$WINDOWS" == "true" ]]; then
+  build-lambda-zip.exe --output "$EXECUTABLE.zip" "$EXECUTABLE" 2>&1 | cat
+else
+  zip "$EXECUTABLE.zip" "$EXECUTABLE"
+fi
+
