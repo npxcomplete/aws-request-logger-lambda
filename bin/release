@@ -1,10 +1,10 @@
 #! /bin/bash
 
-set -eu -o pipefail
+set -eu # -o pipefail
 
 ABSOLUTE_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/$(basename "${BASH_SOURCE[0]}")"
 PROJECT_ROOT=$(dirname $(dirname "$ABSOLUTE_PATH"))
 
 $PROJECT_ROOT/bin/build
-$PROJECT_ROOT/bin/deploy
-#$PROJECT_ROOT/bin/test
+#$PROJECT_ROOT/bin/package
+#$PROJECT_ROOT/bin/verify

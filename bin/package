@@ -1,14 +1,22 @@
 #! /bin/bash
 
-set -eu -o pipefail
+set -eu # -o pipefail
+
+WINDOWS="${WINDOWS:-"false"}"
 
 ABSOLUTE_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/$(basename "${BASH_SOURCE[0]}")"
 PROJECT_ROOT=$(dirname $(dirname "$ABSOLUTE_PATH"))
 
 EXECUTABLE="$PROJECT_ROOT/build/main"
 if [[ "$WINDOWS" == "true" ]]; then
-  build-lambda-zip.exe --output "$EXECUTABLE.zip" "$EXECUTABLE" 2>&1 | cat
+  build-lambda-zip.exe --output "$EXECUTABLE.zip" "$EXECUTABLE" 2>&1
 else
-  zip "$EXECUTABLE.zip" "$EXECUTABLE"
+  zip -j "$EXECUTABLE.zip" "$EXECUTABLE"
+  unzip -l "$EXECUTABLE.zip"
+
+  echo "sha1:"
+  sha1sum "$EXECUTABLE.zip"
+  echo "sha256:"
+  sha256sum "$EXECUTABLE.zip"
 fi
 

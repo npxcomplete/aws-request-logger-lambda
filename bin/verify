@@ -1,0 +1,28 @@
+#! /bin/bash
+
+set -eu # -o pipefail
+
+ABSOLUTE_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/$(basename "${BASH_SOURCE[0]}")"
+PROJECT_ROOT=$(dirname $(dirname "$ABSOLUTE_PATH"))
+
+if [[ $# -eq 1 ]]; then
+  URL="$1"
+  curl -X POST --data '{"hello": "world"}' "$URL"
+else
+  output=$(aws lambda invoke \
+    --function-name 'arn:aws:lambda:ap-southeast-2:092404999568:function:request-logger' \
+    --invocation-type 'RequestResponse' \
+    --log-type 'Tail' \
+    --payload $(echo '{"hello": "world"}' | base64 ) \
+    "$PROJECT_ROOT/build/test-invoke-response.json")
+
+  [ $(echo $output | /c/Users/x64co/bin/jq-win64.exe -r '.LogResult' | base64 -d) ] || echo ""
+
+  cat "$PROJECT_ROOT/build/test-invoke-response.json"
+
+  echo ""
+
+  URL=$(aws cloudformation describe-stacks --stack-name "LambdaDeploymentStack" | jq -r '.Stacks[0].Outputs[] | select(.OutputKey == "lambdaUrl") | .OutputValue')
+  curl -X POST --data '{"hello": "world"}' "$URL" | grep '{"goodbye": "world"}'
+fi
+
